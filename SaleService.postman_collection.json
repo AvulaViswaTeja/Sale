@@ -1,0 +1,71 @@
+{
+  "info": {
+    "name": "Sale Service (RetailFlow)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8091" }
+  ],
+  "item": [
+    {
+      "name": "Create Sale (PENDING - no invoice)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/sales",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"customerId\": 101,\n  \"quantity\": 2,\n  \"status\": \"PENDING\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Create Sale (COMPLETED - auto invoice)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/sales",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"customerId\": 101,\n  \"quantity\": 2,\n  \"status\": \"COMPLETED\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Get All Sales",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/sales" }
+    },
+    {
+      "name": "Get Sale By Id",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/sales/1" }
+    },
+    {
+      "name": "Get By Customer",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/sales/customer/101" }
+    },
+    {
+      "name": "Get By Date Range",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/sales/date-range?start=2026-01-01&end=2026-12-31" }
+    },
+    {
+      "name": "Get Paginated",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/sales/paginated?page=0&size=5" }
+    },
+    {
+      "name": "Update Sale",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/sales/1",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"customerId\": 101,\n  \"quantity\": 5,\n  \"status\": \"COMPLETED\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Cancel Sale",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/sales/1" }
+    }
+  ]
+}

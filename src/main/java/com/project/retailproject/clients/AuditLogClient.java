@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "AuditLogClient", url = "${auditlog.service.url}")
 public interface AuditLogClient {
     @PostMapping("/api/audit-logs")
-    void log(@RequestBody AuditLogRequestDTO dto);
+    void createAuditLog(@RequestBody AuditLogRequestDTO dto);
 }

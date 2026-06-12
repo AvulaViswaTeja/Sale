@@ -30,8 +30,14 @@ public class SaleService {
     @Autowired
     private AuditLogClient auditLogClient;
 
-    private void log(String action) {
-        try { auditLogClient.log(new AuditLogRequestDTO(action)); }
+    private void log(String action,Long userId,String userName) {
+        try {
+            AuditLogRequestDTO dto = new AuditLogRequestDTO();
+            dto.setAction(action);
+            dto.setUserId(userId);
+            dto.setUserName(userName);
+            auditLogClient.createAuditLog(dto);
+        }
         catch (Exception e) { System.err.println("AuditLog failed: " + e.getMessage()); }
     }
 
@@ -46,7 +52,7 @@ public class SaleService {
 
         // 2. Product must be ACTIVE
         if (product.getStatus() == null || !product.getStatus().equalsIgnoreCase("ACTIVE")) {
-            log("Sale.CREATE_FAILED | INACTIVE ProductID: " + dto.getProductId());
+            log("Sale.CREATE_FAILED | INACTIVE ProductID: " + dto.getProductId(),null,null);
             throw new BadRequestException("Cannot sell an inactive product");
         }
 
@@ -63,7 +69,7 @@ public class SaleService {
             hasActiveCatalog = false;
         }
         if (!hasActiveCatalog) {
-            log("Sale.CREATE_FAILED | No active catalog for ProductID: " + dto.getProductId());
+            log("Sale.CREATE_FAILED | No active catalog for ProductID: " + dto.getProductId(),null,null);
             throw new BadRequestException("Product has no active catalog listing for today");
         }
 
@@ -86,7 +92,7 @@ public class SaleService {
                 + " | CustomerID: " + dto.getCustomerId()
                 + " | Qty: " + dto.getQuantity()
                 + " | Amount: " + amount
-                + " | Status: " + saved.getStatus());
+                + " | Status: " + saved.getStatus(),null,null);
 
         // 5. Auto-create invoice if COMPLETED
         Long invoiceId = null;
@@ -95,9 +101,9 @@ public class SaleService {
                 InvoiceResponseDTO inv = invoiceClient.insertInvoice(
                         new InvoiceRequestDTO(saved.getSaleId(), saved.getAmount(),saved.getCustomerId()));
                 invoiceId = inv.getInvoiceId();
-                log("Invoice.AUTO_GENERATED | InvoiceID: " + invoiceId + " | SaleID: " + saved.getSaleId());
+                log("Invoice.AUTO_GENERATED | InvoiceID: " + invoiceId + " | SaleID: " + saved.getSaleId(),null,null);
             } catch (Exception e) {
-                log("Invoice.AUTO_GENERATED_FAILED | SaleID: " + saved.getSaleId() + " | " + e.getMessage());
+                log("Invoice.AUTO_GENERATED_FAILED | SaleID: " + saved.getSaleId() + " | " + e.getMessage(),null,null);
             }
         }
         return mapToDTO(saved, invoiceId);
@@ -107,7 +113,7 @@ public class SaleService {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Sale not found with ID: " + id));
         if (sale.getStatus().equalsIgnoreCase("CANCELLED")) {
-            log("Sale.UPDATE_FAILED | CANCELLED SaleID: " + id);
+            log("Sale.UPDATE_FAILED | CANCELLED SaleID: " + id,null,null);
             throw new BadRequestException("Cannot update a cancelled sale");
         }
         String before = "Qty: " + sale.getQuantity() + " | Status: " + sale.getStatus()
@@ -119,7 +125,7 @@ public class SaleService {
         Sale saved = saleRepository.save(sale);
         log("Sale.UPDATE_SUCCESS | SaleID: " + id + " | Before: " + before
                 + " | After: Qty: " + dto.getQuantity() + " | Status: " + dto.getStatus()
-                + " | Amount: " + newAmount);
+                + " | Amount: " + newAmount,null,null);
         Long invoiceId = null;
         try { invoiceId = invoiceClient.getInvoiceBySaleId(id).getInvoiceId(); } catch (Exception e) {}
         return mapToDTO(saved, invoiceId);
@@ -130,10 +136,10 @@ public class SaleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Sale not found with ID: " + id));
         sale.setStatus("CANCELLED");
         saleRepository.save(sale);
-        try { invoiceClient.cancelInvoiceBySaleId(id); log("Invoice.AUTO_CANCELLED | SaleID: " + id); }
+        try { invoiceClient.cancelInvoiceBySaleId(id); log("Invoice.AUTO_CANCELLED | SaleID: " + id,null,null); }
         catch (Exception e) {}
         log("Sale.CANCEL_SUCCESS | SaleID: " + id + " | CustomerID: " + sale.getCustomerId()
-                + " | Amount: " + sale.getAmount() + " | Status: CANCELLED");
+                + " | Amount: " + sale.getAmount() + " | Status: CANCELLED",null,null);
     }
 
     public SaleResponseDTO getSaleById(Long id) {

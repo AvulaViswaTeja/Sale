@@ -43,20 +43,20 @@ public class SaleService {
 
     @Transactional
     public SaleResponseDTO insertSale(SaleRequestDTO dto) {
-        // 1. Get product
+
         ProductDTO product;
         try { product = productClient.getProduct(dto.getProductId()); }
         catch (Exception e) {
             throw new ResourceNotFoundException("Product not found with ID: " + dto.getProductId());
         }
 
-        // 2. Product must be ACTIVE
+
         if (product.getStatus() == null || !product.getStatus().equalsIgnoreCase("ACTIVE")) {
             log("Sale.CREATE_FAILED | INACTIVE ProductID: " + dto.getProductId(),null,null);
             throw new BadRequestException("Cannot sell an inactive product");
         }
 
-        // 3. Active catalog covering today
+
         boolean hasActiveCatalog;
         try {
             List<CatalogDTO> catalogs = catalogClient.getByProduct(dto.getProductId());
@@ -73,7 +73,7 @@ public class SaleService {
             throw new BadRequestException("Product has no active catalog listing for today");
         }
 
-        // 4. Save sale
+
         double amount = product.getPrice() * dto.getQuantity();
         Sale sale = new Sale();
         sale.setProductId(dto.getProductId());
@@ -94,7 +94,7 @@ public class SaleService {
                 + " | Amount: " + amount
                 + " | Status: " + saved.getStatus(),null,null);
 
-        // 5. Auto-create invoice if COMPLETED
+
         Long invoiceId = null;
         if (saved.getStatus().equalsIgnoreCase("COMPLETED")) {
             try {

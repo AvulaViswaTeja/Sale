@@ -45,7 +45,7 @@ public class SaleService {
     public SaleResponseDTO insertSale(SaleRequestDTO dto) {
         // 1. Get product
         ProductDTO product;
-        try { product = productClient.getProductById(dto.getProductId()); }
+        try { product = productClient.getProduct(dto.getProductId()); }
         catch (Exception e) {
             throw new ResourceNotFoundException("Product not found with ID: " + dto.getProductId());
         }

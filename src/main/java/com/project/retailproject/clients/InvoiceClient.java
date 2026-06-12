@@ -1,11 +1,12 @@
 package com.project.retailproject.clients;
 
+import com.project.retailproject.config.FeignClientInterceptor;
 import com.project.retailproject.dto.InvoiceRequestDTO;
 import com.project.retailproject.dto.InvoiceResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "InvoiceClient", url = "${invoice.service.url}")
+@FeignClient(name = "InvoiceClient", url = "${invoice.service.url}",configuration = FeignClientInterceptor.class)
 public interface InvoiceClient {
     @PostMapping("/api/invoices")
     InvoiceResponseDTO insertInvoice(@RequestBody InvoiceRequestDTO dto);
